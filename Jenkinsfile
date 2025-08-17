@@ -53,4 +53,13 @@ pipeline {
                     sh """
                     ssh -o StrictHostKeyChecking=no ec2-user@$SERVER_IP "
                     docker pull $DOCKER_IMAGE:latest &&
-                    docker stop demo-app
+                    docker stop demo-app || true &&
+                    docker rm demo-app || true &&
+                    docker run -d --name demo-app -p 9090:9090 $DOCKER_IMAGE:latest
+                    "
+                    """
+                }
+            }
+        }
+    }
+}
