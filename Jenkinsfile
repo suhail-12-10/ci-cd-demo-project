@@ -1,11 +1,12 @@
 pipeline {
     agent any
+environment {
+    DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
+    DOCKER_IMAGE = "suhail4545/demo-app"
+    SERVER_IP = "16.16.198.243"
+    SONARQUBE_TOKEN = credentials('sonar-token')
+}
 
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds') // Docker Hub user/pass stored in Jenkins
-        DOCKER_IMAGE = "suhail4545/demo-app"
-        SERVER_IP = "16.16.198.243"
-    }
 
     stages {
         stage('Checkout') {
@@ -72,4 +73,5 @@ pipeline {
         }
     }
 }
+
 
