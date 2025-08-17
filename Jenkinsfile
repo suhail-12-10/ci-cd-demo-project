@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds') // Docker Hub credentials
         DOCKER_IMAGE = "suhail4545/demo-app"
-        SERVER_IP = "16.16.198.243"
+        SERVER_IP = "16.16.195.79"
         SONARQUBE_TOKEN = credentials('sonar-token') // SonarQube token credential
     }
 
@@ -29,7 +29,7 @@ pipeline {
                     cd backend
                     mvn sonar:sonar \
                       -Dsonar.projectKey=demo-app \
-                      -Dsonar.host.url=http://16.16.198.243:9000 \
+                      -Dsonar.host.url=http://16.16.195.79:9000 \
                       -Dsonar.login=$SONARQUBE_TOKEN
                     """
                 }
@@ -63,4 +63,5 @@ pipeline {
         }
     }
 }
+
 
