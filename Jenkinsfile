@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds') // Create in Jenkins with your Docker Hub user/pass
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds') // Docker Hub user/pass stored in Jenkins
         DOCKER_IMAGE = "suhail4545/demo-app"
         SERVER_IP = "16.16.198.243"
     }
@@ -23,8 +23,16 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('My SonarQube') { // Ensure this name matches your SonarQube config in Jenkins
-                    sh 'cd backend && mvn sonar:sonar'
+                withSonarQubeEnv('My SonarQube') { // Name must match Jenkins SonarQube config
+                    withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                        sh """
+                        cd backend
+                        mvn sonar:sonar \
+                          -Dsonar.projectKey=demo \
+                          -Dsonar.host.url=http://16.16.195.79:9000 \
+                          -Dsonar.login=$SONAR_TOKEN
+                        """
+                    }
                 }
             }
         }
@@ -42,7 +50,7 @@ pipeline {
 
         stage('Deploy to Server') {
             steps {
-                sshagent (credentials: ['ec2-ssh-key']) { // Create SSH key credential in Jenkins
+                sshagent (credentials: ['ec2-ssh-key']) { // Your EC2 SSH key stored in Jenkins
                     sh """
                     ssh -o StrictHostKeyChecking=no ec2-user@$SERVER_IP "
                     docker pull $DOCKER_IMAGE:latest &&
