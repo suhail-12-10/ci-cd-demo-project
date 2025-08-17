@@ -36,6 +36,14 @@ pipeline {
                 }
             }
         }
+         stage('SonarQube Quality Gate') {
+            steps {
+                timeout(time: 1, unit: 'HOURS') { // waits up to 1 hour for analysis
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
 
         stage('Docker Build & Push') {
             steps {
@@ -64,3 +72,4 @@ pipeline {
         }
     }
 }
+
