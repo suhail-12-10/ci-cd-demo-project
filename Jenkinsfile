@@ -5,7 +5,7 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds') // Docker Hub credentials
         DOCKER_IMAGE = "suhail4545/demo-app"
         SERVER_IP = "16.16.198.243"
-        SONARQUBE_TOKEN = credentials('sonarqube-token') // SonarQube token credential
+        SONARQUBE_TOKEN = credentials('sonar-token') // SonarQube token credential
     }
 
     stages {
@@ -63,3 +63,4 @@ pipeline {
         }
     }
 }
+
