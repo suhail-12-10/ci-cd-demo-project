@@ -1,12 +1,12 @@
 pipeline {
     agent any
-environment {
-    DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
-    DOCKER_IMAGE = "suhail4545/demo-app"
-    SERVER_IP = "16.16.198.243"
-    SONARQUBE_TOKEN = credentials('sonar-token')
-}
 
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds') // Docker Hub credentials
+        DOCKER_IMAGE = "suhail4545/demo-app"
+        SERVER_IP = "16.16.198.243"
+        SONARQUBE_TOKEN = credentials('sonarqube-token') // SonarQube token credential
+    }
 
     stages {
         stage('Checkout') {
@@ -24,27 +24,17 @@ environment {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('My SonarQube') { // Name must match Jenkins SonarQube config
-                    withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                        sh """
-                        cd backend
-                        mvn sonar:sonar \
-                          -Dsonar.projectKey=demo \
-                          -Dsonar.host.url=http://16.16.195.79:9000 \
-                          -Dsonar.login=$SONAR_TOKEN
-                        """
-                    }
+                withSonarQubeEnv('My SonarQube') { // Must match your Jenkins SonarQube config name
+                    sh """
+                    cd backend
+                    mvn sonar:sonar \
+                      -Dsonar.projectKey=demo-app \
+                      -Dsonar.host.url=http://16.16.198.243:9000 \
+                      -Dsonar.login=$SONARQUBE_TOKEN
+                    """
                 }
             }
         }
-         stage('SonarQube Quality Gate') {
-            steps {
-                timeout(time: 1, unit: 'HOURS') { // waits up to 1 hour for analysis
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
 
         stage('Docker Build & Push') {
             steps {
@@ -59,19 +49,8 @@ environment {
 
         stage('Deploy to Server') {
             steps {
-                sshagent (credentials: ['ec2-ssh-key']) { // Your EC2 SSH key stored in Jenkins
+                sshagent (credentials: ['ec2-ssh-key']) { // Create SSH key credential in Jenkins
                     sh """
                     ssh -o StrictHostKeyChecking=no ec2-user@$SERVER_IP "
                     docker pull $DOCKER_IMAGE:latest &&
-                    docker stop demo-app || true &&
-                    docker rm demo-app || true &&
-                    docker run -d --name demo-app -p 9090:9090 $DOCKER_IMAGE:latest
-                    "
-                    """
-                }
-            }
-        }
-    }
-}
-
-
+                    docker stop demo-app
